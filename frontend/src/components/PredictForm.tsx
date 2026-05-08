@@ -242,7 +242,7 @@ export default function PredictForm() {
               <legend className="w-full">
                 <div
                   className={clsx(
-                    "flex items-center gap-3 px-5 py-4 border-b",
+                    "flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 border-b",
                     sectionHasErrors ? "border-destructive/20 bg-destructive/3" : "border-border/50 bg-muted/30"
                   )}
                 >
@@ -273,7 +273,7 @@ export default function PredictForm() {
               {/* Fields grid */}
               <div
                 className={clsx(
-                  "p-5 grid gap-5",
+                  "p-4 sm:p-5 grid gap-4 sm:gap-5",
                   section.fields.length === 2
                     ? "sm:grid-cols-2"
                     : section.fields.length <= 3

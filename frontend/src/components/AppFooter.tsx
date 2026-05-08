@@ -7,7 +7,7 @@ export default function AppFooter() {
 
   return (
     <footer className="border-t border-border/60 bg-white">
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {/* Brand */}
           <div>

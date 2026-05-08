@@ -49,7 +49,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       riskStyles.bg
     )}>
       {/* Top Banner */}
-      <div className={clsx("px-8 py-10 text-center", riskStyles.text)}>
+      <div className={clsx("px-5 sm:px-8 py-6 sm:py-10 text-center", riskStyles.text)}>
         <div className={clsx(
           "mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg shadow-current/20",
           riskStyles.iconBg
@@ -78,7 +78,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       </div>
 
       {/* Progress Bar / Visualizer */}
-      <div className="bg-white/40 px-8 py-2 backdrop-blur-md">
+      <div className="bg-white/40 px-5 sm:px-8 py-2 backdrop-blur-md">
         <div className="h-2 w-full overflow-hidden rounded-full bg-black/5">
           <div 
             className={clsx("h-full transition-all duration-1000", riskStyles.indicator)} 
@@ -88,7 +88,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       </div>
 
       {/* Details Section */}
-      <div className="bg-white px-8 py-10">
+      <div className="bg-white px-5 sm:px-8 py-6 sm:py-10">
         <div className="space-y-6">
           <div>
             <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">

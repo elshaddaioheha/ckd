@@ -16,7 +16,7 @@ export default function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-white/90 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
         <Link
           href="/"
@@ -25,8 +25,11 @@ export default function AppHeader() {
           <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-white">
             <Activity size={16} strokeWidth={2.5} />
           </span>
-          <span className="font-semibold text-sm tracking-tight">
+          <span className="font-semibold text-sm tracking-tight hidden sm:inline-block">
             CKD Risk Screener
+          </span>
+          <span className="font-semibold text-sm tracking-tight sm:hidden">
+            CKD AI
           </span>
         </Link>
 
@@ -38,7 +41,7 @@ export default function AppHeader() {
                 <Link
                   href={href}
                   className={clsx(
-                    "rounded-md px-3.5 py-2 text-sm font-medium transition-colors duration-150",
+                    "rounded-md px-2.5 sm:px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors duration-150",
                     pathname === href
                       ? "bg-accent text-primary"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
