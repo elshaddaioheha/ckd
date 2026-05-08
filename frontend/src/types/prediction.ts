@@ -90,17 +90,20 @@ export type RiskLevel = "Low" | "Moderate" | "High";
 
 /** Prediction result returned by the FastAPI ML backend */
 export interface CKDPredictionResult {
-  /** Binary class prediction */
-  prediction: "CKD" | "Not CKD";
+  /** Binary class prediction: 'ckd' or 'not_ckd' */
+  prediction: "ckd" | "not_ckd";
 
-  /** Model confidence score (0–1) */
-  confidence: number;
+  /** Model confidence / risk probability (0–1) */
+  risk_probability: number;
 
   /** Derived risk level label */
   risk_level: RiskLevel;
 
-  /** Optional list of top contributing features */
-  contributing_factors?: string[];
+  /** The generated clinical summary used for prediction */
+  clinical_text: string;
+
+  /** Medical disclaimer from the backend */
+  disclaimer: string;
 }
 
 // ─── Field Metadata ──────────────────────────────────────────────────────────

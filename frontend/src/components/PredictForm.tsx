@@ -25,8 +25,9 @@ type CKDFormValues = z.input<typeof CKDInputSchema>;
 type CKDOutputValues = z.output<typeof CKDInputSchema>;
 import { buildClinicalText } from "@/lib/clinicalText";
 import { CKD_FIELD_MAP } from "@/types/prediction";
-import type { CKDPredictionInput } from "@/types/prediction";
+import type { CKDPredictionInput, CKDPredictionResult } from "@/types/prediction";
 import DisclaimerBox from "@/components/DisclaimerBox";
+import PredictionResultCard from "@/components/PredictionResultCard";
 import { Separator } from "@/components/ui/separator";
 
 // ─── Helper Text ─────────────────────────────────────────────────────────────
@@ -134,7 +135,9 @@ function ClinicalTextPreview({ text }: { text: string }) {
 
 export default function PredictForm() {
   const [clinicalText, setClinicalText] = useState<string | null>(null);
+  const [predictionResult, setPredictionResult] = useState<CKDPredictionResult | null>(null);
   const [submitCount, setSubmitCount] = useState(0);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     register,
@@ -145,16 +148,58 @@ export default function PredictForm() {
     mode: "onTouched",
   });
 
-  function onValid(data: CKDOutputValues) {
-    const text = buildClinicalText(data as CKDPredictionInput);
-    setClinicalText(text);
-    setSubmitCount((c) => c + 1);
+  async function onValid(data: CKDOutputValues) {
+    setApiError(null);
+    try {
+      const response = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
+
+      const result: CKDPredictionResult = await response.json();
+      setPredictionResult(result);
+      setClinicalText(result.clinical_text);
+      setSubmitCount((c) => c + 1);
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Failed to connect to the prediction server.");
+      // Fallback: still show clinical text even if API fails
+      setClinicalText(buildClinicalText(data as CKDPredictionInput));
+    }
+  }
+
+  function handleReset() {
+    setPredictionResult(null);
+    setClinicalText(null);
+    setApiError(null);
+    setSubmitCount(0);
+    // Ideally we would reset the form here, but keeping simple for now
   }
 
   const totalErrors = Object.keys(errors).length;
 
   return (
     <div className="space-y-8">
+      {/* API Error alert */}
+      {apiError && (
+        <div
+          role="alert"
+          className="flex gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3"
+        >
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-destructive" />
+          <div className="text-sm text-destructive">
+            <p className="font-bold">Connection Failed</p>
+            <p className="mt-0.5">{apiError}. Please ensure the FastAPI backend is running at http://localhost:8000.</p>
+          </div>
+        </div>
+      )}
+
       {/* Error summary */}
       {totalErrors > 0 && (
         <div
@@ -372,10 +417,14 @@ export default function PredictForm() {
         </div>
       </form>
 
-      {/* Clinical text preview */}
-      {clinicalText && (
-        <div key={submitCount}>
-          <ClinicalTextPreview text={clinicalText} />
+      {/* Results / Preview Section */}
+      {(predictionResult || clinicalText) && (
+        <div key={submitCount} className="pt-4">
+          {predictionResult ? (
+            <PredictionResultCard result={predictionResult} onReset={handleReset} />
+          ) : clinicalText ? (
+            <ClinicalTextPreview text={clinicalText} />
+          ) : null}
         </div>
       )}
 
