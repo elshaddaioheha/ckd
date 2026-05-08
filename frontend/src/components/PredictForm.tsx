@@ -229,8 +229,10 @@ export default function PredictForm() {
           );
 
           return (
-            <fieldset
+            <div
               key={section.id}
+              role="group"
+              aria-labelledby={`section-title-${section.id}`}
               className={clsx(
                 "rounded-2xl border bg-white overflow-hidden transition-all duration-200",
                 sectionHasErrors
@@ -239,7 +241,7 @@ export default function PredictForm() {
               )}
             >
               {/* Section header */}
-              <legend className="w-full">
+              <div id={`section-title-${section.id}`} className="w-full">
                 <div
                   className={clsx(
                     "flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 border-b",
@@ -268,7 +270,7 @@ export default function PredictForm() {
                     </span>
                   )}
                 </div>
-              </legend>
+              </div>
 
               {/* Fields grid */}
               <div
@@ -376,7 +378,7 @@ export default function PredictForm() {
                   );
                 })}
               </div>
-            </fieldset>
+            </div>
           );
         })}
 
