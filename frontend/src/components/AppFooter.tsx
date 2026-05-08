@@ -6,7 +6,7 @@ export default function AppFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border/60 bg-white">
+    <footer className="border-t border-border/60 bg-white print:hidden">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {/* Brand */}

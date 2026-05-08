@@ -44,7 +44,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
 
   return (
     <div className={clsx(
-      "animate-fade-up overflow-hidden rounded-3xl border-2 transition-all duration-500",
+      "animate-fade-up overflow-hidden rounded-3xl border-2 transition-all duration-500 print:rounded-none print:border-none print:shadow-none",
       riskStyles.border,
       riskStyles.bg
     )}>
@@ -112,7 +112,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row pt-4">
+          <div className="flex flex-col gap-4 sm:flex-row pt-4 print:hidden">
             <button
               onClick={onReset}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-primary/90 active:scale-95"

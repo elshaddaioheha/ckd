@@ -8,7 +8,7 @@ export default function PredictPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-14">
       {/* Page header */}
-      <div className="mb-8 sm:mb-10 animate-fade-up">
+      <div className="mb-8 sm:mb-10 animate-fade-up print:hidden">
         <div className="flex items-center gap-2 mb-3">
           <Badge
             variant="secondary"

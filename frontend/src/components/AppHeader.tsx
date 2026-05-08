@@ -15,7 +15,7 @@ export default function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-white/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-white/90 backdrop-blur-sm print:hidden">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
         <Link

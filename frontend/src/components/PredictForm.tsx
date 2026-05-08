@@ -220,7 +220,7 @@ export default function PredictForm() {
         aria-label="CKD Risk Assessment Form"
         onSubmit={handleSubmit(onValid)}
         noValidate
-        className="space-y-6"
+        className={clsx("space-y-6", predictionResult && "print:hidden")}
       >
         {FIELD_SECTIONS.map((section) => {
           const SectionIcon = section.icon;
