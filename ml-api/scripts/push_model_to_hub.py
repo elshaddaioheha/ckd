@@ -13,8 +13,12 @@ import argparse, os, sys
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", required=True,
-                        help="HuggingFace repo id, e.g. yourname/ckd-distilbert")
+                        help="HuggingFace repo id, e.g. Oheha/ckd-distilbert")
+    parser.add_argument("--token", default=None,
+                        help="HuggingFace write token (from huggingface.co/settings/tokens). "
+                             "Falls back to HF_TOKEN env var or cached login.")
     args = parser.parse_args()
+    token = args.token or os.environ.get("HF_TOKEN")
 
     try:
         from huggingface_hub import HfApi
@@ -27,7 +31,7 @@ def main():
         print(f"ERROR: Model not found at {MODEL_DIR}. Train the model first.")
         sys.exit(1)
 
-    api = HfApi()
+    api = HfApi(token=token)
     print(f"Uploading model from {MODEL_DIR} to hub repo: {args.repo} ...")
     api.upload_folder(
         folder_path=MODEL_DIR,
