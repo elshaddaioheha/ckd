@@ -102,6 +102,12 @@ export interface CKDPredictionResult {
   /** The generated clinical summary used for prediction */
   clinical_text: string;
 
+  /** Clinically flagged abnormal findings that explain the result */
+  key_findings: string[];
+
+  /** Narrative reasoning connecting findings to the prediction */
+  reasoning: string;
+
   /** Medical disclaimer from the backend */
   disclaimer: string;
 }

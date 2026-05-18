@@ -77,6 +77,16 @@ coverage.xml
 models/
 checkpoints/
 
+# ── Training Data & Logs ────────────────────────
+# Raw/processed datasets are downloaded on demand
+ml-api/data/raw/
+ml-api/data/processed/
+ml-api/logs/
+logs/
+
+# Keep .gitkeep placeholders
+!ml-api/models/.gitkeep
+
 # ── Jupyter ────────────────────────────────────
 .ipynb_checkpoints/
 *.ipynb

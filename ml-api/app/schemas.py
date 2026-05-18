@@ -28,4 +28,6 @@ class PredictionResponse(BaseModel):
     risk_probability: float
     risk_level: Literal["Low", "Moderate", "High"]
     clinical_text: str
+    key_findings: list[str] = []
+    reasoning: str = ""
     disclaimer: str = "This is an AI-generated risk estimate for educational purposes only. It is not a medical diagnosis."

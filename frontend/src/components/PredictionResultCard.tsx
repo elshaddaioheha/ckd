@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, AlertTriangle, XCircle, RefreshCw, Info } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, RefreshCw, Info, FlaskConical, FileText } from "lucide-react";
 import { clsx } from "clsx";
 import type { CKDPredictionResult } from "@/types/prediction";
 
@@ -20,6 +20,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       iconBg: "bg-emerald-500",
       text: "text-emerald-700",
       indicator: "bg-emerald-500",
+      findingDot: "bg-emerald-500",
       icon: CheckCircle,
     },
     Moderate: {
@@ -28,6 +29,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       iconBg: "bg-amber-500",
       text: "text-amber-700",
       indicator: "bg-amber-500",
+      findingDot: "bg-amber-500",
       icon: AlertTriangle,
     },
     High: {
@@ -36,11 +38,13 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       iconBg: "bg-rose-500",
       text: "text-rose-700",
       indicator: "bg-rose-500",
+      findingDot: "bg-rose-500",
       icon: XCircle,
     },
   }[result.risk_level];
 
   const Icon = riskStyles.icon;
+  const hasFindings = result.key_findings && result.key_findings.length > 0;
 
   return (
     <div className={clsx(
@@ -56,14 +60,14 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
         )}>
           <Icon size={32} />
         </div>
-        
+
         <h2 className="text-sm font-bold uppercase tracking-widest opacity-80">
           Risk Assessment Result
         </h2>
         <p className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
           {result.risk_level} Risk
         </p>
-        
+
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <span className={clsx(
             "rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white",
@@ -77,11 +81,11 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
         </div>
       </div>
 
-      {/* Progress Bar / Visualizer */}
+      {/* Progress Bar */}
       <div className="bg-white/40 px-5 sm:px-8 py-2 backdrop-blur-md">
         <div className="h-2 w-full overflow-hidden rounded-full bg-black/5">
-          <div 
-            className={clsx("h-full transition-all duration-1000", riskStyles.indicator)} 
+          <div
+            className={clsx("h-full transition-all duration-1000", riskStyles.indicator)}
             style={{ width: `${probabilityPercent}%` }}
           />
         </div>
@@ -90,21 +94,59 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
       {/* Details Section */}
       <div className="bg-white px-5 sm:px-8 py-6 sm:py-10">
         <div className="space-y-6">
-          <div>
-            <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <Info size={16} className="text-primary" />
-              Clinical Interpretation
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {isCkd 
-                ? "The clinical values provided align with patterns typically associated with Chronic Kidney Disease. Further diagnostic confirmation via biopsy or imaging may be necessary."
-                : "Based on the provided laboratory values, there is a low probability of Chronic Kidney Disease. However, regular screening is advised for patients with underlying conditions."
-              }
-            </p>
-          </div>
 
+          {/* AI Reasoning Narrative */}
+          {result.reasoning && (
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <Info size={16} className="text-primary" />
+                Clinical Interpretation
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {result.reasoning}
+              </p>
+            </div>
+          )}
+
+          {/* Key Findings */}
+          {hasFindings && (
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
+                <FlaskConical size={16} className="text-primary" />
+                Key Clinical Findings
+                <span className={clsx(
+                  "ml-auto text-xs font-semibold rounded-full px-2.5 py-0.5 text-white",
+                  riskStyles.iconBg
+                )}>
+                  {result.key_findings.length} flagged
+                </span>
+              </h3>
+              <ul className="space-y-2.5">
+                {result.key_findings.map((finding, idx) => (
+                  <li
+                    key={idx}
+                    className={clsx(
+                      "flex gap-3 rounded-xl border px-4 py-3 text-sm leading-relaxed",
+                      isCkd
+                        ? "border-rose-100 bg-rose-50/60 text-rose-900"
+                        : "border-amber-100 bg-amber-50/60 text-amber-900"
+                    )}
+                  >
+                    <span className={clsx(
+                      "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                      riskStyles.findingDot
+                    )} />
+                    {finding}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Clinical Summary */}
           <div className="rounded-2xl bg-muted/30 p-5 border border-border/50">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+            <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              <FileText size={13} />
               Generated Clinical Summary
             </h4>
             <p className="text-xs font-mono leading-relaxed text-foreground/80 italic">
@@ -112,6 +154,7 @@ export default function PredictionResultCard({ result, onReset }: PredictionResu
             </p>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex flex-col gap-4 sm:flex-row pt-4 print:hidden">
             <button
               onClick={onReset}

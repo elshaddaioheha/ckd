@@ -150,8 +150,9 @@ export default function PredictForm() {
 
   async function onValid(data: CKDOutputValues) {
     setApiError(null);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
     try {
-      const response = await fetch("http://localhost:8000/predict", {
+      const response = await fetch(`${apiUrl}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,7 +161,8 @@ export default function PredictForm() {
       });
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+        const detail = await response.text().catch(() => response.statusText);
+        throw new Error(`API Error ${response.status}: ${detail}`);
       }
 
       const result: CKDPredictionResult = await response.json();
@@ -168,7 +170,8 @@ export default function PredictForm() {
       setClinicalText(result.clinical_text);
       setSubmitCount((c) => c + 1);
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : "Failed to connect to the prediction server.");
+      const msg = err instanceof Error ? err.message : "Failed to connect to the prediction server.";
+      setApiError(msg);
       // Fallback: still show clinical text even if API fails
       setClinicalText(buildClinicalText(data as CKDPredictionInput));
     }
@@ -195,7 +198,7 @@ export default function PredictForm() {
           <AlertCircle size={16} className="mt-0.5 shrink-0 text-destructive" />
           <div className="text-sm text-destructive">
             <p className="font-bold">Connection Failed</p>
-            <p className="mt-0.5">{apiError}. Please ensure the FastAPI backend is running at http://localhost:8000.</p>
+            <p className="mt-0.5">{apiError}. Please ensure the FastAPI backend is running at {process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}.</p>
           </div>
         </div>
       )}
@@ -401,19 +404,19 @@ export default function PredictForm() {
             {isSubmitting ? (
               <>
                 <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Validating…
+                Running AI Assessment…
               </>
             ) : (
               <>
                 <CheckCircle size={15} />
-                Generate Clinical Summary
+                Run AI Assessment
               </>
             )}
           </button>
 
-          {isSubmitSuccessful && clinicalText && (
+          {isSubmitSuccessful && predictionResult && (
             <p className="text-xs text-primary font-medium animate-fade-in">
-              Validation passed — summary generated below.
+              Assessment complete — results shown below.
             </p>
           )}
         </div>
