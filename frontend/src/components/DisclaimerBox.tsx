@@ -27,6 +27,13 @@ export default function DisclaimerBox({ className, compact = false }: Disclaimer
         It does not constitute medical advice, clinical diagnosis, or treatment
         recommendations. Always consult a qualified and licensed healthcare provider
         before making any health-related decisions.
+        {!compact && (
+          <span className="block mt-1.5 text-xs text-amber-800">
+            Model trained on UCI CKD dataset (Apollo Hospitals, India). Results should be
+            interpreted within local clinical context. Not validated for sickle cell nephropathy,
+            herbal medicine nephrotoxicity, or endemic infections common in West Africa.
+          </span>
+        )}
       </div>
     </div>
   );

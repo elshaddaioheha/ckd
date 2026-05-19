@@ -13,6 +13,8 @@ import {
   AlertCircle,
   ChevronDown,
   FileText,
+  ArrowLeftRight,
+  Info,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -33,7 +35,7 @@ import { Separator } from "@/components/ui/separator";
 // ─── Helper Text ─────────────────────────────────────────────────────────────
 
 const HELPER_TEXT: Partial<Record<keyof CKDPredictionInput, string>> = {
-  sc: "Key CKD indicator. Normal range: 0.6–1.2 mg/dL. Elevated values suggest reduced kidney filtration.",
+  sc: "Key CKD indicator. Normal: 0.6–1.2 mg/dL (53–106 µmol/L). Elevated values suggest reduced kidney filtration. Use the µmol/L toggle if your lab reports in those units.",
   bu: "Measures kidney waste removal. Normal range: 7–25 mg/dL. Elevated values may indicate renal impairment.",
   sg: "Reflects kidney concentration ability. Normal range: 1.005–1.030. Very low values may indicate poor renal function.",
   pcv:
@@ -138,6 +140,8 @@ export default function PredictForm() {
   const [predictionResult, setPredictionResult] = useState<CKDPredictionResult | null>(null);
   const [submitCount, setSubmitCount] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
+  // Creatinine unit toggle: "mg/dL" | "umol/L"
+  const [scUnit, setScUnit] = useState<"mg/dL" | "umol/L">("mg/dL");
 
   const {
     register,
@@ -150,14 +154,22 @@ export default function PredictForm() {
 
   async function onValid(data: CKDOutputValues) {
     setApiError(null);
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+
+    // Convert creatinine from µmol/L to mg/dL if user selected that unit
+    // 1 mg/dL = 88.42 µmol/L
+    const payload = { ...data };
+    if (scUnit === "umol/L" && typeof payload.sc === "number") {
+      payload.sc = parseFloat((payload.sc / 88.42).toFixed(4));
+    }
+
     try {
       const response = await fetch(`${apiUrl}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -189,6 +201,28 @@ export default function PredictForm() {
 
   return (
     <div className="space-y-8">
+
+      {/* West Africa Context Notice */}
+      <div
+        role="note"
+        aria-label="Regional context notice"
+        className="flex gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3.5"
+      >
+        <Info size={16} className="mt-0.5 shrink-0 text-blue-500" />
+        <div className="text-sm text-blue-900 leading-relaxed">
+          <span className="font-semibold">West African Clinical Context — </span>
+          This model was trained on the UCI CKD dataset (India). It handles the
+          most common CKD drivers in West Africa — <strong>hypertension</strong> and{" "}
+          <strong>diabetes</strong> — but does <em>not</em> account for sickle cell
+          nephropathy, herbal/traditional medicine nephrotoxicity, or malaria-related
+          kidney injury. Use results alongside full clinical judgement.{" "}
+          <strong>
+            Creatinine values from francophone labs may be in µmol/L — use the
+            unit toggle on the Serum Creatinine field below.
+          </strong>
+        </div>
+      </div>
+
       {/* API Error alert */}
       {apiError && (
         <div
@@ -308,7 +342,53 @@ export default function PredictForm() {
                       </label>
 
                       {/* Input or Select */}
-                      {meta.control === "number" ? (
+                  {fieldKey === "sc" ? (
+                    // ── Special: Serum Creatinine with unit toggle ──
+                    <div className="space-y-1.5">
+                      <div className="flex gap-2">
+                        <input
+                          id={fieldKey}
+                          type="number"
+                          step="any"
+                          min={0}
+                          placeholder={scUnit === "mg/dL" ? "e.g. 1.2" : "e.g. 106"}
+                          aria-describedby={
+                            hasError ? `${fieldKey}-error` : helperText ? `${fieldKey}-help` : undefined
+                          }
+                          aria-invalid={hasError}
+                          {...register(fieldKey as keyof CKDFormValues, { valueAsNumber: true })}
+                          className={clsx(
+                            "h-10 flex-1 rounded-lg border px-3 text-sm text-foreground placeholder:text-muted-foreground/50 bg-background",
+                            "focus:outline-none focus:ring-2 focus:ring-ring/60 focus:border-ring",
+                            "transition-all duration-150",
+                            hasError
+                              ? "border-destructive/60 bg-destructive/3 focus:ring-destructive/30"
+                              : "border-input hover:border-muted-foreground/40"
+                          )}
+                        />
+                        <button
+                          type="button"
+                          title="Toggle creatinine unit"
+                          onClick={() => setScUnit(u => u === "mg/dL" ? "umol/L" : "mg/dL")}
+                          className={clsx(
+                            "inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border text-xs font-semibold",
+                            "transition-all duration-150 whitespace-nowrap",
+                            scUnit === "umol/L"
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-input bg-muted text-muted-foreground hover:text-foreground hover:border-muted-foreground/40"
+                          )}
+                        >
+                          <ArrowLeftRight size={11} />
+                          {scUnit}
+                        </button>
+                      </div>
+                      {scUnit === "umol/L" && (
+                        <p className="text-xs text-blue-600 font-medium">
+                          ✓ Will auto-convert to mg/dL before submission (÷ 88.42)
+                        </p>
+                      )}
+                    </div>
+                  ) : meta.control === "number" ? (
                         <input
                           id={fieldKey}
                           type="number"

@@ -1,8 +1,9 @@
 import os
+import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .schemas import CKDInput, PredictionResponse
-from .predict import run_prediction
+from .predict import run_prediction, load_model, model
 from .settings import settings
 
 app = FastAPI(
@@ -26,17 +27,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Load model in a background thread so the server starts immediately."""
+    thread = threading.Thread(target=load_model, daemon=True)
+    thread.start()
+
 @app.get("/")
 def read_root():
+    from .predict import model as _model
     return {
         "app": settings.app_name,
         "status": "online",
+        "model_loaded": _model is not None,
         "version": "0.1.0"
     }
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    # Always return 200 — model loads in background after startup
+    from .predict import model as _model
+    return {"status": "ok", "model_ready": _model is not None}
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(data: CKDInput):
