@@ -9,6 +9,7 @@ from .clinical_text import build_clinical_text
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "ckd-distilbert")
 # Cloud deployment: set HF_MODEL_REPO=yourname/ckd-distilbert to load from HuggingFace Hub
 HF_MODEL_REPO = os.environ.get("HF_MODEL_REPO", "")
+HF_TOKEN = os.environ.get("HF_TOKEN", None)
 
 model = None
 tokenizer = None
@@ -16,10 +17,11 @@ tokenizer = None
 def load_model():
     global model, tokenizer
     source = None
+    token = HF_TOKEN or None
 
     if os.path.exists(MODEL_PATH) and os.path.exists(os.path.join(MODEL_PATH, "model.safetensors")):
         source = MODEL_PATH
-        print(f"Loading fine-tuned DistilBERT model from {MODEL_PATH}...")
+        print(f"Loading fine-tuned DistilBERT model from local path: {MODEL_PATH}...")
     elif HF_MODEL_REPO:
         source = HF_MODEL_REPO
         print(f"Loading fine-tuned DistilBERT model from HuggingFace Hub: {HF_MODEL_REPO}...")
@@ -28,15 +30,15 @@ def load_model():
         return
 
     try:
-        tokenizer = AutoTokenizer.from_pretrained(source)
-        model = AutoModelForSequenceClassification.from_pretrained(source)
+        tokenizer = AutoTokenizer.from_pretrained(source, token=token)
+        model = AutoModelForSequenceClassification.from_pretrained(source, token=token)
         model.eval()
-        print("Model loaded successfully.")
+        print("Model loaded successfully from:", source)
     except Exception as e:
         print(f"Error loading model: {e}. Falling back to mock prediction.")
 
-# Initialize on module load
-load_model()
+# NOTE: load_model() is called from app/main.py startup event in a background thread
+# This allows the server to start and pass healthchecks before the model finishes loading
 
 # ─── Clinical Reasoning Engine ────────────────────────────────────────────────
 
